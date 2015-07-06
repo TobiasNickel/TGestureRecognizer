@@ -2,10 +2,6 @@ if (window.goog) {
     goog.provide('MMGestureRecognizer');
 }
 
-/**
- * todo: after implementing the copy mechanism of touch object, it is no longer necessary to provide curTime, lastTime and beginTime.
- */
-
 
 /**
  * @constructor
@@ -41,27 +37,39 @@ var MMGestureRecognizer = function(el, config) {
     this.longTolerance = config.longTolerance || 5;
     this.tapTolerance = config.tapTolerance || 5;
     this.panDistance = config.panDistance || 5;
-    this.doubleTapSpeed = 400;
-    this.doubleTapDistance = 15;
+    this.doubleTapSpeed = config.doubleTapSpeed || 400;
+    this.doubleTapDistance = config.doubleTapDistance  || 15;
     this.minFirstPanDistance = config.minFirstPanDistance || 5;
+    
     
     var touchStartHandler = function(e) {
         updateFinger(e.touches, e.timeStamp, e);
+        if(e.touches.length == 1){
+            document.addEventListener('touchmove', touchMoveHandler);
+            document.addEventListener('touchend', touchEndHandler);
+        }
     };
     var touchMoveHandler = function(e) {
         updateFinger(e.touches, e.timeStamp, e);
     };
     var touchEndHandler = function(e) {
         updateFinger(e, e.timeStamp, e);
+        if(!e.touches.length){
+			document.removeEventListener('touchmove', touchMoveHandler);
+			document.removeEventListener('touchend', touchEndHandler);
+		}
     };
     
     el.addEventListener('touchstart', touchStartHandler);
-    el.addEventListener('touchmove', touchMoveHandler);
-    el.addEventListener('touchend', touchEndHandler);
     
     this.finger = {};
     var fingerCount = 0;
     var that = this;
+    
+    /**
+     * Method that is called on any touchEvent
+     * and executes the GestureDetection-methods
+     */
     function updateFinger(finger, time, e) {
         if (!that) return;
         var orgPrevent = e.preventDefault;
@@ -71,6 +79,8 @@ var MMGestureRecognizer = function(el, config) {
         
         var i; // used for loops
         var identifier = []; // list of the touch identifirer on the given event
+        
+        // handle all finger that are currently on the screen
         for (i = 0; i < finger.length; i++) {
             // copy the touch Object to create compatibility between android and iOS
             // because iOS is not creating a new touch Object on touchmove.
@@ -81,7 +91,7 @@ var MMGestureRecognizer = function(el, config) {
                 that.finger[curFinger.identifier] = {
                     beginFinger: curFinger
                 };
-                that.trigger('touchstart', {finger:that.finger[curFinger.identifier], originalEvent: e});
+                that.trigger('touchstart', {finger: that.finger[curFinger.identifier], originalEvent: e});
                 
                 fingerCount++;
                 clearLongPress();
@@ -89,11 +99,12 @@ var MMGestureRecognizer = function(el, config) {
                     detectLongpress(that.finger[curFinger.identifier], e);
             }
             
-            if (!that)
-                return;
+            if (!that) return;
             that.finger[curFinger.identifier].lastFinger = that.finger[curFinger.identifier].curFinger || curFinger;
             that.finger[curFinger.identifier].curFinger = curFinger;
         }
+        
+        // detect if Fingers left the screen
         for (i in that.finger) {
             if (identifier.indexOf(i) === -1 && identifier.length == 0) {
                 var f = that.finger[i];
@@ -105,9 +116,9 @@ var MMGestureRecognizer = function(el, config) {
                     detectThrow(f, e);
                 
                 detectTap(f, e);
-                that.trigger('touchend',{finger:f, originalEvent: e});
+                that.trigger('touchend', {finger: f, originalEvent: e});
                 if (f.panning) {
-                    that.trigger('panend', {finger:f, originalEvent: e});
+                    that.trigger('panend', {finger: f, originalEvent: e});
                 }
                 clearLongPress();
                 if (identifier.length < 2 && curPinch) {
@@ -149,21 +160,23 @@ var MMGestureRecognizer = function(el, config) {
     
     function detectMove(f, e) {
         if (fingerCount !== 1 || !f) return;
-        f.offset = {x: f.curFinger.screenX - f.lastFinger.screenX,
-            y: f.curFinger.screenY - f.lastFinger.screenY};
+        f.offset = {
+            x: f.curFinger.screenX - f.lastFinger.screenX,
+            y: f.curFinger.screenY - f.lastFinger.screenY
+        };
         that.trigger('touchmove', {finger:f, originalEvent: e});
         
         f.offset = {x: f.curFinger.screenX - f.lastFinger.screenX,
             y: f.curFinger.screenY - f.lastFinger.screenY};
         if (!f.longPressed) {
             if (f.panning) {
-                that.trigger('pan', {finger:f, originalEvent: e});
+                that.trigger('pan', {finger: f, originalEvent: e});
             } else if (distanceOfFingers(f.beginFinger, f.curFinger) > that.minFirstPanDistance) {
                 f.offset = {x: f.curFinger.screenX - f.beginFinger.screenX,
                     y: f.curFinger.screenY - f.beginFinger.screenY};
                 f.panning = true;
-                that.trigger("panstart", {finger:f, originalEvent: e});
-                that.trigger("pan", {finger:f, originalEvent: e});
+                that.trigger("panstart", {finger: f, originalEvent: e});
+                that.trigger("pan", {finger: f, originalEvent: e});
             }
         }
     }
@@ -176,9 +189,9 @@ var MMGestureRecognizer = function(el, config) {
         if (lastTap && f.lastFinger !== lastTap.lastFinger 
         && distanceOfFingers(f.lastFinger, lastTap.lastFinger) < that.doubleTapDistance 
         && (f.curFinger.timeStamp - lastTap.curFinger.timeStamp) < that.doubleTapSpeed) {
-            that.trigger('doubletap',{finger:f, originalEvent: e});
+            that.trigger('doubletap',{finger: f, originalEvent: e});
         } else if (!f.longPressed) {
-            that.trigger('tap', {finger:f, originalEvent: e});
+            that.trigger('tap', {finger: f, originalEvent: e});
             lastTap = f;
         }
     
@@ -278,15 +291,18 @@ var MMGestureRecognizer = function(el, config) {
         var speed = (1000 / deltaTime) * delta;
         if (speed > 200) {
             that.trigger('throw')
-            if (deltaX < 0) {
-                that.trigger('throwright');
+            if(deltaX > deltaY){
+                if (deltaX < 0 ) {
+                    that.trigger('throwright');
+                } else {
+                    that.trigger('throwleft');
+                }
             } else {
-                that.trigger('throwleft');
-            }
-            if (deltaY < 0) {
-                that.trigger('throwup');
-            } else {
-                that.trigger('throwdown');
+                if (deltaY < 0) {
+                    that.trigger('throwup');
+                } else {
+                    that.trigger('throwdown');
+                }
             }
         }
     }
