@@ -1,0 +1,32 @@
+<html>
+<head></head>
+<meta name="viewport" content="width=device-width, initial-scale=0.8, maximum-scale=1, user-scalable=no" />
+<script src="MMGestureRecognizer.js"></script>
+<script>
+
+//display
+function display(ob){
+    var arr=[];
+    for(var i in ob){
+        arr.push((i +" - "+ob[i]).slice(0,30));
+    }
+    __log(arr.join('<br>'));
+}
+function __log(a){
+      document.body.innerHTML="---------------------------------------<br>"//+  document.body.innerHTML;
+      document.body.innerHTML="<h1>"+a +"</h1>"//+  document.body.innerHTML;
+      
+}
+window.onload=function(){
+    var recognizer = new MMGestureRecognizer( document.body);
+	var angle=0;
+    recognizer.on('rotate',function(changeAngle){
+		angle+=changeAngle;
+        document.querySelector('div').style.transform='rotate('+angle+'deg)';
+    });
+
+};
+
+</script>
+<body><div style="background-color:lightBlue;width:30px;height:30px;"></div></body>
+</html>

@@ -222,6 +222,7 @@ var MMGestureRecognizer = function(el, config) {
         longPress = null;
     }
     
+	
     var lastFingers = [1, 2];
     var lastDistance = null;
     var curPinch = null;
@@ -239,6 +240,11 @@ var MMGestureRecognizer = function(el, config) {
             var dy = finger[0].curFinger.screenY - finger[1].curFinger.screenY;
             var curDistance = Math.sqrt(dx * dx + dy * dy);
             if (lastDistance) {
+				var angleChanged = angleChange(
+					posToAngle(finger[0].lastFinger,finger[1].lastFinger),
+					posToAngle(finger[0].curFinger,finger[1].curFinger));
+				if(angleChanged)
+					that.trigger('rotate',angleChanged);
                 var distanceChange = curDistance - lastDistance;
                 if (Math.abs(distanceChange) > that.minPinchDistance) {
                     if (curPinch === null) {
@@ -256,7 +262,20 @@ var MMGestureRecognizer = function(el, config) {
         lastDistance = curDistance;
         lastFingers = finger;
     }
-    
+    /**
+	 *two helper Methods for the rotation
+	 */
+	function posToAngle(startFinger, endFinger) {
+		var dx = endFinger.clientX - startFinger.clientX,
+			dy = endFinger.clientY - startFinger.clientY,
+			angle = Math.acos(dx / Math.sqrt(dx * dx + dy * dy)) / Math.PI * 180;
+		return 0 > dy ? angle : -angle;
+	};
+	function angleChange(a,b){
+		return (a-b);
+	}
+	
+	
     function detectSwipe(finger, e) {
         if ((finger.lastFinger.timeStamp - finger.beginFinger.timeStamp) < that.swipeSpeed) {
             if (distanceOfFingers(finger.beginFinger, finger.lastFinger) < that.minSwipeDistance)
