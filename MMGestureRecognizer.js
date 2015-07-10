@@ -240,11 +240,13 @@ var MMGestureRecognizer = function(el, config) {
             var dy = finger[0].curFinger.screenY - finger[1].curFinger.screenY;
             var curDistance = Math.sqrt(dx * dx + dy * dy);
             if (lastDistance) {
+				var lastAngle = posToAngle(finger[0].lastFinger,finger[1].lastFinger);
+				var currAngle = posToAngle(finger[0].curFinger,finger[1].curFinger));
 				var angleChanged = angleChange(
-					posToAngle(finger[0].lastFinger,finger[1].lastFinger),
-					posToAngle(finger[0].curFinger,finger[1].curFinger));
+					lastAngle,
+					currAngle;
 				if(angleChanged)
-					that.trigger('rotate',angleChanged);
+					that.trigger('rotate',{lastAngle:lastAngle,curAngle:currAngle,angleChange:angleChanged});
                 var distanceChange = curDistance - lastDistance;
                 if (Math.abs(distanceChange) > that.minPinchDistance) {
                     if (curPinch === null) {

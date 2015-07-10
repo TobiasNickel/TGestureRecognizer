@@ -20,8 +20,8 @@ function __log(a){
 window.onload=function(){
     var recognizer = new MMGestureRecognizer( document.body);
 	var angle=0;
-    recognizer.on('rotate',function(changeAngle){
-		angle+=changeAngle;
+    recognizer.on('rotate',function(e){
+		angle += e.angleChanged;
         document.querySelector('div').style.transform='rotate('+angle+'deg)';
     });
 
