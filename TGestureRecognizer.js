@@ -1,8 +1,3 @@
-if (window.goog) {
-    goog.provide('MMGestureRecognizer');
-}
-
-
 /**
  * @constructor
  * @param el {htmlElement} the element where the events are going to me detected, you can add this to the body to capture all.
@@ -24,7 +19,7 @@ if (window.goog) {
  *	'pan'
  *	'panend'
  */
-var MMGestureRecognizer = function(el, config) {
+var GestureRecognizer = function(el, config) {
     "use strict";
     var tMitter=function(){function d(a,b){a=a.toLowerCase();a in this._events||(this._events[a]=[]);-1===this._events[a].indexOf(b)&&this._events[a].push(b)}function e(a,b){a?b?delete this._events[a][this._events[a].indexOf(b)]:delete this._events[a]:this._events={}}function f(a,b){if(a&&this._events[a])for(var c=this._events[a].length;c--;)this._events[a][c](b)}return function(a){a._events={};a.on=d;a.off=e;a.trigger=f}}();
  	tMitter(this);
@@ -40,7 +35,7 @@ var MMGestureRecognizer = function(el, config) {
     this.doubleTapSpeed = config.doubleTapSpeed || 400;
     this.doubleTapDistance = config.doubleTapDistance  || 15;
     this.minFirstPanDistance = config.minFirstPanDistance || 5;
-    
+    var touchMode = config.touchMode||false;
     
     var touchStartHandler = function(e) {
         updateFinger(e.touches, e.timeStamp, e);
@@ -62,6 +57,41 @@ var MMGestureRecognizer = function(el, config) {
     
     el.addEventListener('touchstart', touchStartHandler);
     
+    var mouseStartHandler = function(e) {
+        if(touchMode)return;
+        mouseEventToTouch(e);
+        if(!e.touches)e.touches=[];
+        updateFinger(e.touches, e.timeStamp, e);
+        if(e.touches.length == 1){
+            document.body.addEventListener('mousemove', mouseMoveHandler);
+            document.body.addEventListener('mouseup', mouseEndHandler);
+        }
+    };
+    var mouseMoveHandler = function(e) {
+        if(touchMode)return;
+        mouseEventToTouch(e);
+        if(!e.touches)e.touches=[];
+        updateFinger(e.touches, e.timeStamp, e);
+    };
+    var mouseEndHandler = function(e) {
+        if(touchMode)return;
+        if(!e.touches)e.touches=[];
+        updateFinger(e, e.timeStamp, e);
+        if(!e.touches.length){
+			document.body.removeEventListener('mousemove', mouseMoveHandler);
+			document.body.removeEventListener('mouseup', mouseEndHandler);
+		}
+    };
+    el.addEventListener('mousedown',mouseStartHandler);
+
+    function mouseEventToTouch(e){
+        if(e instanceof MouseEvent){
+            e.touches=[e];
+        }
+    }
+
+
+
     this.finger = {};
     var fingerCount = 0;
     var that = this;
@@ -241,10 +271,10 @@ var MMGestureRecognizer = function(el, config) {
             var curDistance = Math.sqrt(dx * dx + dy * dy);
             if (lastDistance) {
 				var lastAngle = posToAngle(finger[0].lastFinger,finger[1].lastFinger);
-				var currAngle = posToAngle(finger[0].curFinger,finger[1].curFinger));
+				var currAngle = posToAngle(finger[0].curFinger,finger[1].curFinger);
 				var angleChanged = angleChange(
 					lastAngle,
-					currAngle;
+					currAngle);
 				if(angleChanged)
 					that.trigger('rotate',{lastAngle:lastAngle,curAngle:currAngle,angleChange:angleChanged});
                 var distanceChange = curDistance - lastDistance;
@@ -337,6 +367,7 @@ var MMGestureRecognizer = function(el, config) {
         el.removeEventListener('touchstart', touchStartHandler);
         el.removeEventListener('touchmove', touchMoveHandler);
         el.removeEventListener('touchend', touchEndHandler);
+        el.removeEventListener('mousedown', mouseStartHandler);
         this.off();
         this.finger = null;
         lastFingers = null;
@@ -345,4 +376,3 @@ var MMGestureRecognizer = function(el, config) {
         el = null;
     };
 }
-
