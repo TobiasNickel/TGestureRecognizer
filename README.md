@@ -1,4 +1,4 @@
-# MMGestureRecognizer
+# T-Gesture-Recognizer
 Gesture Recognizer for mobile and desktop HTML apps. The T-Gesture-Recognizer makes it easy for developers to handle touch gestures, starting from a single tap over doubletap to swipe, pinch and throw gestures. 
 
 The usage is very simple. You create a new GestureRecognizer and provide him the DOM-node, where the user will touch on. Then you can add eventlistener to various Events that get triggered as soon as the user is performing a gesture on the element. 
