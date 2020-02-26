@@ -1,16 +1,16 @@
 # MMGestureRecognizer
-Gesture Recognizer for mobile HTML apps. The MMGestureRecognizer makes it easy for developer to handle touch gestures, starting from a single tap over doubletap to swipe, pinch and throw gestures. 
+Gesture Recognizer for mobile and desktop HTML apps. The T-Gesture-Recognizer makes it easy for developers to handle touch gestures, starting from a single tap over doubletap to swipe, pinch and throw gestures. 
 
-The usage is very simple. You create a new MMGestureRecognizer and provide him the DOM-node, where the user will touch on. Then you can add eventlistener to various Events that get triggered as soon as the user is performing a gesture on the element. 
+The usage is very simple. You create a new GestureRecognizer and provide him the DOM-node, where the user will touch on. Then you can add eventlistener to various Events that get triggered as soon as the user is performing a gesture on the element. 
 
 ## Motivation
-While developing the mobile- and WeChat-version of babel.cc we wanted to provide gesture controll as known in native apps. In the first place we tryed to use some libraries that are already available. But each of them had a downside, that made it impossible to use in our project. One Gesture framework was not able to recognice the gestures we need, others stop the propagation and prevent the default behavior of the browser and the next kind of recognizer only let the user draw fancy images.
+While developing the mobile- and WeChat-version of babel.cc we wanted to provide gesture controls as known in native apps. In the first place we tried to use some libraries that are already available, such as a very popular Hammer.js. But each of them had a downside, that made it impossible to use in our project. One Gesture framework was not able to recognize the gestures we need, others stop the propagation and prevent the default behavior of the browser and the next kind of recognizer only let the user draw fancy images.
 
 ## API
-to show how it works, I will provide a bunch od code-examples, that you can extend for your needs.
+To show how it works, I will provide a bunch of code-examples, that you can extend for your needs.
 
-**function MMGestureRecognizer(elment, options)**
-The constructor takes the element where gestures need to get recognized as first parameter and an object with options as second.the options are:
+**function GestureRecognizer(elment, options)**
+The constructor takes the element, where gestures need to get recognized as first parameter and an object with options as second. The options are:
 
     1. swipeSpeed, the speed that the users finger need to reach to trigger the swipe (default: 400)
     2. swipePrecision = defines how much the user need to swipe into one direction to recognise that as the corresponging direction. 1: 45deg up/down  2: 30deg up/down... (default: 6)
@@ -33,11 +33,21 @@ We tested with various devices, in different sizes, operating systems, scree siz
 ## events
 To register an Event use the on method, the names of the events are in the following in bold font.
 
-**tap** is used for a single tap. A **doubletap** will drigger two times tap as well as **doubletap**. For **longpress** the user needs to hold the finger for the configured time. **pinchstart** happens as soon as the user touches with a second finger the screen. **pinch** when the user moves one of his fingers and **pinchend** will be executed when the user is lifting one of his fingers.
-The movement of a finger can be recognized using **pan** or **touchmove**. They are basicly the same, but pan only happens when the finger has not triggered **longpress**, for **pan** as well as for **touchmove** are the corresponding events for start and end (**panstart**, **panend**, **touchstart**, **touchend**). For a **swipe** is a single finger very short on the screen and moves fast in a direction. Depending on the direction how the finger moves, **swipeup**, **swipedown**, **swipeleft** or **swiperight** are driggered. In addition to swipe, a **throw** is triggered, when the finger is a little longer on the screen and moves fast in a direction, before the finger is taken from the screen. For throw are also the version **throwup**, **throwdown**, **throwleft** and **throwright**. Throw makes it possible to move some UI element using **pan** or **touchmove** over the screen and throw it back to its original position, without moving the finger all the way back. The latest update has brought the **rotate** Event that is triggered when pinch, and telling you the angle the two fingers rotate around each other.
+ - **tap** is used for a single tap. 
+ - **doubletap** will trigger after two finger taps. 
+ - For **longpress** the user needs to hold the finger still for some time. 
+ - **pinchstart** happens as soon as the user touches with a second finger the screen. 
+ - **pinch** when the user moves one of his fingers 
+ - and **pinchend** will be executed when the user is lifting one of his fingers.
+ - The movement of a finger can be recognized using **pan** or **touchmove**. They are basiclly the same, but pan only happens when the finger has not triggered **longpress**. 
+ - For **pan** as well as for **touchmove** we got the corresponding events for start and end (**panstart**, **panend**, **touchstart**, **touchend**).
+  - For a **swipe** is a single finger very short on the screen and moves fast in a direction. 
+  - Depending on the direction that the finger moves, **swipeup**, **swipedown**, **swipeleft** or **swiperight** are triggered. 
+  - In addition to swipe a **throw** is triggered, when the finger is a little longer on the screen and moves fast in a direction, before the finger is taken from the screen. 
+  - For throw are also the version **throwup**, **throwdown**, **throwleft** and **throwright**. Throw makes it possible to move some UI element using **pan** or **touchmove** over the screen and throw it back to its original position, without moving the finger all the way back. You know that from Android, when you pull the menu from the top of the screen.
+  - The latest update has brought the **rotate** event. That is triggered when pinch, and telling you the angle the two fingers rotate around each other.
 
-## Demo
-Try out our app, that is using these recognizer on babel.cc.
+
 
 
 
