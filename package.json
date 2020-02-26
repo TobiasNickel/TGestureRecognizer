@@ -1,0 +1,12 @@
+{
+    "name": "t-gesture-recognizer",
+    "version": "0.0.0",
+    "license": "MIT",
+    "author": {
+        "name": "Tobias Nickel",
+        "url": "business@tnickel.de"
+    },
+    "dependencies": {
+        "tmitter": "^3.0.3"
+    }
+}
